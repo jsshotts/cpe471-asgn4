@@ -10,22 +10,22 @@ uniform sampler2D tex2;
 
 void main()
 {
+//diffuse
+vec3 lp = vec3(0, 3, 10);
 vec3 n = normalize(vertex_normal);
-vec3 lp=vec3(10,-20,-100);
-vec3 ld = normalize(vertex_pos - lp);
-float diffuse = dot(n,ld);
+vec3 ld = normalize(lp - vertex_pos);
+float diffuse = clamp(dot(n, ld), 0, 1);
 
-color = texture(tex, vertex_tex).rgb;
+//specular
+vec3 lightColor = vec3(1, 1, 1);
+vec3 cd = normalize(campos - vertex_pos);
+vec3 h = normalize(cd + ld);
+float spec = dot(n, h);
+spec = clamp(spec, 0, 1);
+spec = pow(spec, 10);
 
-color *= diffuse*0.7;
-
-vec3 cd = normalize(vertex_pos - campos);
-vec3 h = normalize(cd+ld);
-float spec = dot(n,h);
-spec = clamp(spec,0,1);
-spec = pow(spec,20);
-color += vec3(1,1,1)*spec*3;
-
-
-
+//color
+vec2 vertTex  = { vertex_tex.x, -vertex_tex.y };
+vec3 baseColor = texture(tex, vertTex).rgb;
+color = baseColor * (0.3 + diffuse*0.7) + lightColor*spec*3;
 }
